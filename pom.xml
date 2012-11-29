@@ -4,10 +4,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>net.uk.sparks</groupId>
-    <artifactId>webstack.zengrids</artifactId>
+    <groupId>net.uk.sparks.webstack</groupId>
+    <artifactId>zengrids</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <packaging>maven-plugin</packaging>
 
     <name>ZenGridsJavaLibrary</name>
     <description>Maven artifact for generating a Sass/Compass/ZenGrids Java library over JRuby</description>
@@ -49,15 +49,24 @@
     </scm>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <gem.sass.version>3.2.3</gem.sass.version>
+        <gem.compass.version>0.12.2</gem.compass.version>
+        <gem.zen-grids.version>1.2</gem.zen-grids.version>
         <jruby.version>1.7.0.preview2</jruby.version>
+
+        <maven-plugin-api.version>3.0</maven-plugin-api.version>
+        <aether-api.version>1.13.1</aether-api.version>
+        <maven-plugin-testing-harness.version>2.1</maven-plugin-testing-harness.version>
+
         <exec-maven-plugin.version>1.2.1</exec-maven-plugin.version>
         <maven-jar-plugin.version>2.4</maven-jar-plugin.version>
 
-        <jruby.install.gems>sass compass zen-grids</jruby.install.gems>
-        <jruby.install.args>--no-rdoc --no-ri</jruby.install.args>
-        <jruby.install.cmd>-S gem install ${jruby.install.gems} -i ${generated.sources.gems} ${jruby.install.args}</jruby.install.cmd>
-
         <generated.sources.gems>${project.build.directory}/generated-sources/rubygems</generated.sources.gems>
+        <jruby.install.args>--no-rdoc --no-ri</jruby.install.args>
+        <jruby.install.cmd.pre>-classpath %classpath org.jruby.Main -S gem install</jruby.install.cmd.pre>
+        <jruby.install.cmd.post>-i ${generated.sources.gems} ${jruby.install.args}</jruby.install.cmd.post>
     </properties>
 
     <dependencies>
@@ -65,7 +74,37 @@
             <groupId>org.jruby</groupId>
             <artifactId>jruby-complete</artifactId>
             <version>${jruby.version}</version>
-            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-plugin-api</artifactId>
+            <version>${maven-plugin-api.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-core</artifactId>
+            <version>${maven-plugin-api.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.sonatype.aether</groupId>
+            <artifactId>aether-api</artifactId>
+            <version>${aether-api.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.sonatype.aether</groupId>
+            <artifactId>aether-util</artifactId>
+            <version>${aether-api.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.maven.plugin-testing</groupId>
+            <artifactId>maven-plugin-testing-harness</artifactId>
+            <version>${maven-plugin-testing-harness.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -83,19 +122,34 @@
                 <version>${exec-maven-plugin.version}</version>
                 <executions>
                     <execution>
-                        <id>install-gems</id>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
+                        <id>install-sass</id>
+                        <goals><goal>exec</goal></goals>
                         <phase>generate-sources</phase>
+                        <configuration>
+                            <executable>java</executable>
+                            <commandlineArgs>${jruby.install.cmd.pre} sass -v ${gem.sass.version} ${jruby.install.cmd.post}</commandlineArgs>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>install-compass</id>
+                        <goals><goal>exec</goal></goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <executable>java</executable>
+                            <commandlineArgs>${jruby.install.cmd.pre} compass -v ${gem.compass.version} ${jruby.install.cmd.post}</commandlineArgs>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>install-zen-grids</id>
+                        <goals><goal>exec</goal></goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <executable>java</executable>
+                            <commandlineArgs>${jruby.install.cmd.pre} zen-grids -v ${gem.zen-grids.version} ${jruby.install.cmd.post}</commandlineArgs>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <executable>java</executable>
-                    <commandlineArgs>-classpath %classpath org.jruby.Main ${jruby.install.cmd}</commandlineArgs>
-                </configuration>
             </plugin>
         </plugins>
     </build>
-
 </project>
