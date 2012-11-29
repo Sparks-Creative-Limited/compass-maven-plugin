@@ -48,6 +48,10 @@
         <url>scm:git:git@github.com:simonsparks/ZenGridsJavaLibrary.git</url>
     </scm>
 
+    <prerequisites>
+        <maven>3.0</maven>
+    </prerequisites>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
