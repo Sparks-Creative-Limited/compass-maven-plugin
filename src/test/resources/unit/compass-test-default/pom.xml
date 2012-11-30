@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>net.uk.sparks.webstack</groupId>
+    <artifactId>compass-test-default</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <inceptionYear>2012</inceptionYear>
+
+    <licenses>
+        <license>
+            <name>Apache License 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <organization>
+        <name>Sparks Creative Limited</name>
+        <url>http://sparks.uk.net</url>
+    </organization>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>net.uk.sparks.webstack</groupId>
+                <artifactId>compass-maven-plugin</artifactId>
+                <version>1.0-SNAPSHOT</version>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <phase>generate-resources</phase>
+                        <goals><goal>install</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
