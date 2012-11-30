@@ -18,29 +18,25 @@ package net.uk.sparks.webstack.compass.plugin;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.jruby.embed.LocalContextScope;
+import org.jruby.embed.ScriptingContainer;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+
+import static net.uk.sparks.webstack.compass.utils.LoadPathsHelper.getLoadPaths;
 
 /**
- * Installs .scss library dependencies into a project.
+ * Creates Compass base layout resources into a project.
+ * By default, these will be installed in under the <code>{project.basedir}/src/main/resources/compass</code> directory.
+ * Optional Compass extensions may also be installed and configured under this layout.
  *
- * @goal install
+ * @goal create
  */
-public class InstallMojo extends AbstractMojo {
+public class CreateMojo extends AbstractMojo {
 
-    private static final String INSTALLING_LIBRARIES_MESSAGE = "Installing libraries";
+    private static final String CREATING_COMPASS_MESSAGE = "Creating Compass resources.";
     private static final String INVALID_DIRECTORY_ERROR = "Library install directory is invalid.";
     private static final String UNDEFINED_DIRECTORY_ERROR = "Library install directory is undefined.";
-
-
-    /**
-     * Base libraries to install. Typically will left as the default sass and compass pair.
-     * @parameter expression="${compass.libraries}" default-value="sass compass"
-     */
-    private String libraries;
 
     /**
      * Compass extensions to include with installation of the base libraries.
@@ -48,10 +44,9 @@ public class InstallMojo extends AbstractMojo {
      */
     private String[] extensions;
 
-
     /**
      * Source directory for .sass and .scss files. Expressed relative to the project base directory.
-     * @parameter expression="${compass.directory}" default-value="${project.basedir}/src/main/resources/scss"
+     * @parameter expression="${compass.directory}" default-value="${project.basedir}/src/main/resources/compass"
      */
     private File directory;
 
@@ -61,41 +56,16 @@ public class InstallMojo extends AbstractMojo {
 
     public void execute() throws MojoExecutionException, MojoFailureException {
 
-        getLog().info(INSTALLING_LIBRARIES_MESSAGE);
+        getLog().info(CREATING_COMPASS_MESSAGE);
 
         if(directory != null) {
             if(directory.exists() || directory.mkdirs()) {
-                writeResource("bin/sass", new File(directory, "test"));
-
+                ScriptingContainer container = new ScriptingContainer(LocalContextScope.CONCURRENT);
+                container.setCurrentDirectory(directory.getAbsolutePath());
+                container.setLoadPaths(getLoadPaths());
+                //container.setClassLoader(getClass().getClassLoader());
+                container.runScriptlet("exit Compass::Exec:SubCommandUI.new([\"create\", \"compass\", \"-q\"]).run!");
             } else throw new MojoFailureException(INVALID_DIRECTORY_ERROR);
         } else throw new MojoFailureException(UNDEFINED_DIRECTORY_ERROR);
-    }
-
-
-    private void writeResource(String resource, File target) throws MojoFailureException {
-
-        InputStream input = null;
-        FileOutputStream output = null;
-        try {
-
-            input = getClass().getClassLoader().getResourceAsStream(resource);
-
-            if(!target.exists()) target.createNewFile();
-            output = new FileOutputStream(target);
-
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = input.read(buffer)) != -1) output.write(buffer, 0, bytesRead);
-
-        } catch (IOException e) {
-            throw new MojoFailureException(e.getMessage());
-        } finally {
-            try {
-                if(output != null) output.close();
-                if(input != null) input.close();
-            } catch (IOException e) {
-                throw new MojoFailureException(e.getMessage());
-            }
-        }
     }
 }
