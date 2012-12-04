@@ -23,6 +23,10 @@
         <url>http://sparks.uk.net</url>
     </organization>
 
+    <properties>
+        <jruby.gem.jar>true</jruby.gem.jar>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>net.uk.sparks.webstack</groupId>
@@ -34,32 +38,6 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.2.1</version>
-                <executions>
-                    <execution>
-                        <id>validate-available-gems</id>
-                        <goals><goal>exec</goal></goals>
-                        <phase>validate</phase>
-                        <configuration>
-                            <executable>java</executable>
-                            <commandlineArgs>-classpath %classpath org.jruby.Main -S gem list</commandlineArgs>
-                        </configuration>
-                    </execution>
-                    <!--<execution>-->
-                        <!--<id>create-compass-resources</id>-->
-                        <!--<goals><goal>exec</goal></goals>-->
-                        <!--<phase>generate-resources</phase>-->
-                        <!--<configuration>-->
-                            <!--<executable>java</executable>-->
-                            <!--<commandlineArgs>-classpath %classpath org.jruby.Main -S compass create ${project.basedir}/src/main/resources/compass</commandlineArgs>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
-                </executions>
-            </plugin>
-
-            <plugin>
                 <groupId>net.uk.sparks.webstack</groupId>
                 <artifactId>compass-maven-plugin</artifactId>
                 <version>1.0-SNAPSHOT</version>
@@ -68,6 +46,11 @@
                         <id>create</id>
                         <phase>generate-resources</phase>
                         <goals><goal>create</goal></goals>
+                    </execution>
+                    <execution>
+                        <id>compile</id>
+                        <phase>generate-resources</phase>
+                        <goals><goal>compile</goal></goals>
                     </execution>
                 </executions>
             </plugin>

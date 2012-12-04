@@ -15,7 +15,6 @@
 
 package net.uk.sparks.webstack.compass.plugin;
 
-import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.jruby.embed.LocalContextScope;
@@ -32,11 +31,7 @@ import static net.uk.sparks.webstack.compass.utils.LoadPathsHelper.getLoadPaths;
  *
  * @goal create
  */
-public class CreateMojo extends AbstractMojo {
-
-    private static final String CREATING_COMPASS_MESSAGE = "Creating Compass resources.";
-    private static final String INVALID_DIRECTORY_ERROR = "Library install directory is invalid.";
-    private static final String UNDEFINED_DIRECTORY_ERROR = "Library install directory is undefined.";
+public class CreateMojo extends AbstractCompassMojo {
 
     /**
      * Compass extensions to include with installation of the base libraries.
@@ -51,21 +46,18 @@ public class CreateMojo extends AbstractMojo {
     private File directory;
 
 
+    public void execute() throws MojoExecutionException, MojoFailureException {
+        getMojoHelper().create(this);
+    }
+
+
     public void setExtensions(String[] extensions) { this.extensions = extensions; }
 
+    public String[] getExtensions() {
+        return extensions;
+    }
 
-    public void execute() throws MojoExecutionException, MojoFailureException {
-
-        getLog().info(CREATING_COMPASS_MESSAGE);
-
-        if(directory != null) {
-            if(directory.exists() || directory.mkdirs()) {
-                ScriptingContainer container = new ScriptingContainer(LocalContextScope.CONCURRENT);
-                container.setCurrentDirectory(directory.getAbsolutePath());
-                container.setLoadPaths(getLoadPaths());
-                //container.setClassLoader(getClass().getClassLoader());
-                container.runScriptlet("exit Compass::Exec:SubCommandUI.new([\"create\", \"compass\", \"-q\"]).run!");
-            } else throw new MojoFailureException(INVALID_DIRECTORY_ERROR);
-        } else throw new MojoFailureException(UNDEFINED_DIRECTORY_ERROR);
+    public File getDirectory() {
+        return directory;
     }
 }

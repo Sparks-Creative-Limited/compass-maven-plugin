@@ -55,11 +55,13 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.build.generatedSources>${project.build.directory}/generated-sources</project.build.generatedSources>
+        <properties.sources>${project.build.generatedSources}/properties</properties.sources>
 
         <gem.sass.version>3.2.3</gem.sass.version>
         <gem.compass.version>0.12.2</gem.compass.version>
         <gem.zen-grids.version>1.2</gem.zen-grids.version>
-        <jruby.version>1.7.0.preview2</jruby.version>
+        <jruby.version>1.6.7</jruby.version>
 
         <maven-plugin-api.version>2.0</maven-plugin-api.version>
         <junit.version>3.8.1</junit.version>
@@ -67,10 +69,10 @@
         <exec-maven-plugin.version>1.2.1</exec-maven-plugin.version>
         <maven-jar-plugin.version>2.4</maven-jar-plugin.version>
 
-        <generated.sources.gems>${project.build.directory}/generated-sources/rubygems</generated.sources.gems>
+        <jruby.gems.sources>${project.build.generatedSources}/rubygems</jruby.gems.sources>
         <jruby.install.args>--no-rdoc --no-ri</jruby.install.args>
         <jruby.install.cmd.pre>-classpath %classpath org.jruby.Main -S gem install</jruby.install.cmd.pre>
-        <jruby.install.cmd.post>-i ${generated.sources.gems} ${jruby.install.args}</jruby.install.cmd.post>
+        <jruby.install.cmd.post>-i ${jruby.gems.sources} ${jruby.install.args}</jruby.install.cmd.post>
     </properties>
 
     <dependencies>
@@ -103,63 +105,105 @@
     <build>
         <resources>
             <resource>
-                <directory>${generated.sources.gems}</directory>
+                <directory>${properties.sources}</directory>
             </resource>
         </resources>
 
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>${exec-maven-plugin.version}</version>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0-alpha-2</version>
                 <executions>
                     <execution>
-                        <id>install-sass</id>
-                        <goals><goal>exec</goal></goals>
-                        <phase>generate-sources</phase>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>write-project-properties</goal>
+                        </goals>
                         <configuration>
-                            <executable>java</executable>
-                            <commandlineArgs>${jruby.install.cmd.pre} sass -v ${gem.sass.version} ${jruby.install.cmd.post}</commandlineArgs>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>install-compass</id>
-                        <goals><goal>exec</goal></goals>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <executable>java</executable>
-                            <commandlineArgs>${jruby.install.cmd.pre} compass -v ${gem.compass.version} ${jruby.install.cmd.post}</commandlineArgs>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>install-zen-grids</id>
-                        <goals><goal>exec</goal></goals>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <executable>java</executable>
-                            <commandlineArgs>${jruby.install.cmd.pre} zen-grids -v ${gem.zen-grids.version} ${jruby.install.cmd.post}</commandlineArgs>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-patch-plugin</artifactId>
-                <version>1.1.1</version>
-                <executions>
-                    <execution>
-                        <id>apply-rubygems-patches</id>
-                        <goals><goal>apply</goal></goals>
-                        <phase>process-sources</phase>
-                        <configuration>
-                            <patches>
-                                <patch>sass-3.2.3_lib_sass_version.rb.patch</patch>
-                            </patches>
-                            <targetDirectory>${generated.sources.gems}</targetDirectory>
+                            <outputFile>${properties.sources}/META-INF/plugin.properties</outputFile>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>gemjar</id>
+            <activation>
+                <property>
+                    <name>!jruby.gems.local</name>
+                </property>
+            </activation>
+
+            <properties>
+                <jruby.gems.jar>true</jruby.gems.jar>
+            </properties>
+
+            <build>
+                <resources>
+                    <resource>
+                        <directory>${jruby.gems.sources}</directory>
+                    </resource>
+                </resources>
+
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>${exec-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>install-sass</id>
+                                <goals><goal>exec</goal></goals>
+                                <phase>generate-sources</phase>
+                                <configuration>
+                                    <executable>java</executable>
+                                    <commandlineArgs>${jruby.install.cmd.pre} sass -v ${gem.sass.version} ${jruby.install.cmd.post}</commandlineArgs>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>install-compass</id>
+                                <goals><goal>exec</goal></goals>
+                                <phase>generate-sources</phase>
+                                <configuration>
+                                    <executable>java</executable>
+                                    <commandlineArgs>${jruby.install.cmd.pre} compass -v ${gem.compass.version} ${jruby.install.cmd.post}</commandlineArgs>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>install-zen-grids</id>
+                                <goals><goal>exec</goal></goals>
+                                <phase>generate-sources</phase>
+                                <configuration>
+                                    <executable>java</executable>
+                                    <commandlineArgs>${jruby.install.cmd.pre} zen-grids -v ${gem.zen-grids.version} ${jruby.install.cmd.post}</commandlineArgs>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-patch-plugin</artifactId>
+                        <version>1.1.1</version>
+                        <executions>
+                            <execution>
+                                <id>apply-rubygems-patches</id>
+                                <goals><goal>apply</goal></goals>
+                                <phase>process-sources</phase>
+                                <configuration>
+                                    <patches>
+                                        <patch>sass-3.2.3_lib_sass_version.rb.patch</patch>
+                                    </patches>
+                                    <targetDirectory>${jruby.gems.sources}</targetDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

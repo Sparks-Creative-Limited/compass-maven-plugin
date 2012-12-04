@@ -15,7 +15,6 @@
 
 package net.uk.sparks.webstack.compass.plugin;
 
-import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
@@ -28,7 +27,7 @@ import java.io.File;
  * @goal compile
  * @phase generate-sources
  */
-public class CompileMojo extends AbstractMojo {
+public class CompileMojo extends AbstractCompassMojo {
 
     /**
      * Source directory for .sass and .scss files. Expressed relative to the project base directory.
@@ -43,6 +42,6 @@ public class CompileMojo extends AbstractMojo {
     private String target;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        getLog().info("Compiling css resources");
+        getMojoHelper().compile(this);
     }
 }
