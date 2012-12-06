@@ -20,14 +20,51 @@ import net.uk.sparks.webstack.compass.plugin.CreateMojo;
 import net.uk.sparks.webstack.compass.plugin.MojoHelper;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.jruby.Main;
+
+import java.io.File;
 
 public class LocalMojoHelper implements MojoHelper {
 
+    private static final String DEFAULT_GEMS_DIR = "src/main/rubygems";
+    private static final String[] GEMS = {"sass -v 3.2.3", "compass -v 0.12.2", "zen-grids -v 1.2"};
+    private static final String SPACE = " ";
+
+    private static final String CREATE_LOCAL_MESSAGE = "Creating Local based layout.";
+    private static final String COMPILE_LOCAL_MESSAGE = "Compiling with Local libraries.";
+
+    private static final String GEMS_DIRECTORY_ERROR = "Failed to create gems directory ";
+    private static final String GEM_INSTALL_ERROR = "Failed to install gem: ";
+    private static final String COMPASS_CREATE_ERROR = "Failed to create compass resources";
+
+
     public void create(CreateMojo mojo) throws MojoExecutionException, MojoFailureException {
-        mojo.getLog().info("Creating Local based layout.");
+        mojo.getLog().info(CREATE_LOCAL_MESSAGE);
+        File gemDir = new File(mojo.getMavenProject().getBasedir(), DEFAULT_GEMS_DIR);
+
+        if(gemDir.exists() || gemDir.mkdirs()) {
+            for(int i = 0; i < GEMS.length; i++) {
+                if(new Main().run(new StringBuilder("-S gem install ").append(GEMS[i])
+                        .append(" -i ").append(gemDir.getAbsolutePath())
+                        .append(" --no-rdoc --no-ri").toString().split(SPACE)).getStatus() > 0) {
+                    throw new MojoExecutionException(GEM_INSTALL_ERROR + GEMS[i]);
+                }
+            }
+
+            File compassDir = mojo.getDirectory();
+
+            if(compassDir.exists() || compassDir.mkdirs()) {
+                if(new Main().run(new StringBuilder("-v -C ").append(gemDir.getAbsolutePath())
+                        .append(" -I ").append(gemDir.getAbsolutePath())
+                        .append(" -S bin/compass create ").append(compassDir.getAbsolutePath())
+                        .toString().split(SPACE)).getStatus() > 0) {
+                    throw new MojoExecutionException(COMPASS_CREATE_ERROR);
+                }
+            }
+        } else throw new MojoExecutionException(GEMS_DIRECTORY_ERROR + gemDir.getAbsolutePath());
     }
 
     public void compile(CompileMojo mojo) throws MojoExecutionException, MojoFailureException {
-        mojo.getLog().info("Compiling with Local libraries.");
+        mojo.getLog().info(COMPILE_LOCAL_MESSAGE);
     }
 }

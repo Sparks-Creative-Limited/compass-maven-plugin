@@ -20,14 +20,23 @@ import net.uk.sparks.webstack.compass.plugin.CreateMojo;
 import net.uk.sparks.webstack.compass.plugin.MojoHelper;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.descriptor.PluginDescriptor;
+import org.jruby.CompatVersion;
+import org.jruby.Ruby;
+import org.jruby.RubyBoolean;
 import org.jruby.embed.LocalContextScope;
 import org.jruby.embed.ScriptingContainer;
 
 import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
 
-import static net.uk.sparks.webstack.compass.utils.LoadPathsHelper.getLoadPaths;
 
 public class GemJarMojoHelper implements MojoHelper {
+
+    private static final String[] GEMS = {"sass-3.2.3",
+            "compass-0.12.2", "chunky_png-1.2.6", "fssm-0.2.9",
+            "zen-grids-1.2"};
 
     private static final String CREATING_COMPASS_MESSAGE = "Creating Compass resources.";
     private static final String INVALID_DIRECTORY_ERROR = "Library install directory is invalid.";
@@ -40,8 +49,15 @@ public class GemJarMojoHelper implements MojoHelper {
         if(directory != null) {
             if(directory.exists() || directory.mkdirs()) {
                 ScriptingContainer container = new ScriptingContainer(LocalContextScope.CONCURRENT);
+                container.setCompatVersion(CompatVersion.RUBY1_9);
                 container.setCurrentDirectory(directory.getAbsolutePath());
-                container.setLoadPaths(getLoadPaths());
+                container.setLoadPaths(getLoadPaths(mojo));
+//                if(mojo.getLog().isDebugEnabled()) {
+                    Ruby runtime = container.getProvider().getRuntime();
+                    RubyBoolean rubyTrue = new RubyBoolean(runtime, true);
+                    runtime.setDebug(rubyTrue);
+                    runtime.setVerbose(rubyTrue);
+//                }
                 container.runScriptlet(createCompassScript("targetdir"));
             } else throw new MojoFailureException(INVALID_DIRECTORY_ERROR);
         } else throw new MojoFailureException(UNDEFINED_DIRECTORY_ERROR);
@@ -49,6 +65,14 @@ public class GemJarMojoHelper implements MojoHelper {
 
     public void compile(CompileMojo mojo) throws MojoExecutionException, MojoFailureException {
         mojo.getLog().info("Compiling with Gem Jar libraries.");
+    }
+
+    private List<String> getLoadPaths(CreateMojo mojo) {
+        List<String> loadPaths = new LinkedList<String>();
+        for(String gem : GEMS) loadPaths.add(new StringBuilder("file:")
+                .append(((PluginDescriptor) mojo.getPluginContext().get("pluginDescriptor")).getSource())
+                .append("!/META-INF/jruby.home/gems/").append(gem).append("/lib").toString());
+        return loadPaths;
     }
 
     private String createCompassScript(String... args) {

@@ -19,6 +19,7 @@ import net.uk.sparks.webstack.compass.utils.GemJarMojoHelper;
 import net.uk.sparks.webstack.compass.utils.LocalMojoHelper;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.project.MavenProject;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -28,6 +29,16 @@ public abstract class AbstractCompassMojo extends AbstractMojo {
     private static final String PLUGIN_PROPERTIES_PATH = "/META-INF/plugin.properties";
     private static final String PLUGIN_PROPERTIES_ERROR = "Could not locate plugin properties";
     private static final String PROPERTY_JRUBY_GEMS_JAR = "jruby.gems.jar";
+
+
+    /** @parameter default-value="${project}" */
+    private org.apache.maven.project.MavenProject mavenProject;
+
+
+    public MavenProject getMavenProject() {
+        return mavenProject;
+    }
+
 
     protected MojoHelper getMojoHelper() throws MojoFailureException {
         Properties pluginProperties = new Properties();

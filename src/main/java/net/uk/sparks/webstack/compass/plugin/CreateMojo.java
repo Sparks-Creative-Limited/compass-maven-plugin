@@ -17,12 +17,8 @@ package net.uk.sparks.webstack.compass.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.jruby.embed.LocalContextScope;
-import org.jruby.embed.ScriptingContainer;
 
 import java.io.File;
-
-import static net.uk.sparks.webstack.compass.utils.LoadPathsHelper.getLoadPaths;
 
 /**
  * Creates Compass base layout resources into a project.

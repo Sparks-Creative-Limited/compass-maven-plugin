@@ -72,7 +72,7 @@
         <jruby.gems.sources>${project.build.generatedSources}/rubygems</jruby.gems.sources>
         <jruby.install.args>--no-rdoc --no-ri</jruby.install.args>
         <jruby.install.cmd.pre>-classpath %classpath org.jruby.Main -S gem install</jruby.install.cmd.pre>
-        <jruby.install.cmd.post>-i ${jruby.gems.sources} ${jruby.install.args}</jruby.install.cmd.post>
+        <jruby.install.cmd.post>-i ${jruby.gems.sources}/META-INF/jruby.home ${jruby.install.args}</jruby.install.cmd.post>
     </properties>
 
     <dependencies>
