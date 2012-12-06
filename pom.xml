@@ -196,6 +196,7 @@
                                 <configuration>
                                     <patches>
                                         <patch>sass-3.2.3_lib_sass_version.rb.patch</patch>
+                                        <patch>chunky_png_engine.patch</patch>
                                     </patches>
                                     <targetDirectory>${jruby.gems.sources}</targetDirectory>
                                 </configuration>

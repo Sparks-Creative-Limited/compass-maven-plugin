@@ -1,0 +1,19 @@
+--- META-INF/jruby.home/gems/compass-0.12.2/lib/compass/sass_extensions/sprites/engines/chunky_png_engine.rb	2012-12-06 00:30:21.000000000 +0000
++++ META-INF/jruby.home/gems/compass-0.12.2/lib/compass/sass_extensions/sprites/engines/chunky_png_engine.rb	2012-12-06 00:38:07.000000000 +0000
+@@ -1,8 +1,4 @@
+-begin
+-  require 'oily_png'
+-rescue LoadError
+-  require 'chunky_png'
+-end
++require 'chunky_png'
+ 
+ module Compass
+   module SassExtensions
+@@ -28,4 +24,4 @@
+       end
+     end
+   end
+-end  
+\ No newline at end of file
++end  

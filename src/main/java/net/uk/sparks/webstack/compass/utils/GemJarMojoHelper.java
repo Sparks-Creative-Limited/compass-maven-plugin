@@ -53,10 +53,7 @@ public class GemJarMojoHelper implements MojoHelper {
                 container.setCurrentDirectory(directory.getAbsolutePath());
                 container.setLoadPaths(getLoadPaths(mojo));
 //                if(mojo.getLog().isDebugEnabled()) {
-                    Ruby runtime = container.getProvider().getRuntime();
-                    RubyBoolean rubyTrue = new RubyBoolean(runtime, true);
-                    runtime.setDebug(rubyTrue);
-                    runtime.setVerbose(rubyTrue);
+                    setRubyDebug(container);
 //                }
                 container.runScriptlet(createCompassScript("targetdir"));
             } else throw new MojoFailureException(INVALID_DIRECTORY_ERROR);
@@ -82,5 +79,12 @@ public class GemJarMojoHelper implements MojoHelper {
                 .append("require 'compass/exec'\n")
                 .append("exit Compass::Exec::SubCommandUI.new([\"create\", \"").append(args[0]).append("\", \"--trace\"]).run!")
                 .toString();
+    }
+
+    private void setRubyDebug(ScriptingContainer container) {
+        Ruby runtime = container.getProvider().getRuntime();
+        RubyBoolean rubyTrue = new RubyBoolean(runtime, true);
+        runtime.setDebug(rubyTrue);
+        runtime.setVerbose(rubyTrue);
     }
 }
