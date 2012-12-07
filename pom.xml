@@ -195,9 +195,10 @@
                                 <phase>process-sources</phase>
                                 <configuration>
                                     <patches>
-                                        <patch>sass-3.2.3_lib_sass_version.rb.patch</patch>
-                                        <patch>chunky_png_engine.patch</patch>
-                                        <patch>compass_commands_base.patch</patch>
+                                        <patch>compass-0.12.2_lib_compass_configuration_adapters.patch</patch>
+                                        <patch>compass-0.12.2_lib_compass_frameworks.patch</patch>
+                                        <patch>compass-0.12.2_lib_compass_sass_extensions_sprites_engines_chunky_png_engine.patch</patch>
+                                        <patch>sass-3.2.3_lib_sass_importers_filesystem.patch</patch>
                                     </patches>
                                     <targetDirectory>${jruby.gems.sources}</targetDirectory>
                                 </configuration>
