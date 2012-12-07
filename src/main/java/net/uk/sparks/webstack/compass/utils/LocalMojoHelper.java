@@ -17,14 +17,13 @@ package net.uk.sparks.webstack.compass.utils;
 
 import net.uk.sparks.webstack.compass.plugin.CompileMojo;
 import net.uk.sparks.webstack.compass.plugin.CreateMojo;
-import net.uk.sparks.webstack.compass.plugin.MojoHelper;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.jruby.Main;
 
 import java.io.File;
 
-public class LocalMojoHelper implements MojoHelper {
+public class LocalMojoHelper extends AbstractMojoHelper {
 
     private static final String DEFAULT_GEMS_DIR = "src/main/rubygems";
     private static final String[] GEMS = {"sass -v 3.2.3", "compass -v 0.12.2", "zen-grids -v 1.2"};

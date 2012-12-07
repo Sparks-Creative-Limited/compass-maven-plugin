@@ -15,6 +15,7 @@
 
 package net.uk.sparks.webstack.compass.plugin;
 
+import net.uk.sparks.webstack.compass.utils.AbstractMojoHelper;
 import net.uk.sparks.webstack.compass.utils.GemJarMojoHelper;
 import net.uk.sparks.webstack.compass.utils.LocalMojoHelper;
 import org.apache.maven.plugin.AbstractMojo;
@@ -40,7 +41,7 @@ public abstract class AbstractCompassMojo extends AbstractMojo {
     }
 
 
-    protected MojoHelper getMojoHelper() throws MojoFailureException {
+    protected AbstractMojoHelper getMojoHelper() throws MojoFailureException {
         Properties pluginProperties = new Properties();
 
         try {

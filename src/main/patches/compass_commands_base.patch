@@ -1,0 +1,10 @@
+--- META-INF/ruby.gems/gems/compass-0.12.2/lib/compass/commands/base.rb	2012-12-06 09:56:12.000000000 +0000
++++ META-INF/ruby.gems/gems/compass-0.12.2/lib/compass/commands/base.rb	2012-12-06 09:57:51.000000000 +0000
+@@ -34,6 +34,7 @@
+ 
+       def framework
+         unless Compass::Frameworks[options[:framework]]
++	  puts caller
+           raise Compass::Error.new("No such framework: #{options[:framework].inspect}")
+         end
+         Compass::Frameworks[options[:framework]]

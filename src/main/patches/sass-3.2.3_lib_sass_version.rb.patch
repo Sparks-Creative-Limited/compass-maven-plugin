@@ -1,5 +1,5 @@
---- META-INF/jruby.home/gems/sass-3.2.3/lib/sass/version.rb	2012-11-30 15:52:47.000000000 +0000
-+++ META-INF/jruby.home/gems/sass-3.2.3/lib/sass/version.rb	2012-11-30 15:42:08.000000000 +0000
+--- META-INF/ruby.gems/gems/sass-3.2.3/lib/sass/version.rb	2012-11-30 15:52:47.000000000 +0000
++++ META-INF/ruby.gems/gems/sass-3.2.3/lib/sass/version.rb	2012-11-30 15:42:08.000000000 +0000
 @@ -2,7 +2,7 @@
  
  # This is necessary for loading Sass when Haml is required in Rails 3.
