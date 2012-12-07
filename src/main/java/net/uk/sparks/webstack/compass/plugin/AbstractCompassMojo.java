@@ -15,22 +15,21 @@
 
 package net.uk.sparks.webstack.compass.plugin;
 
-import net.uk.sparks.webstack.compass.utils.AbstractMojoHelper;
-import net.uk.sparks.webstack.compass.utils.GemJarMojoHelper;
-import net.uk.sparks.webstack.compass.utils.LocalMojoHelper;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
+import org.jruby.CompatVersion;
+import org.jruby.Ruby;
+import org.jruby.RubyBoolean;
+import org.jruby.embed.LocalContextScope;
+import org.jruby.embed.ScriptingContainer;
 
-import java.io.IOException;
-import java.util.Properties;
 
 public abstract class AbstractCompassMojo extends AbstractMojo {
 
-    private static final String PLUGIN_PROPERTIES_PATH = "/META-INF/plugin.properties";
-    private static final String PLUGIN_PROPERTIES_ERROR = "Could not locate plugin properties";
-    private static final String PROPERTY_JRUBY_GEMS_JAR = "jruby.gems.jar";
+    private final LoadPathHelper loadPathHelper = new LoadPathHelper(this);
 
+    private final ResourceHelper resourceHelper = new ResourceHelper(this);
 
     /** @parameter default-value="${project}" */
     private org.apache.maven.project.MavenProject mavenProject;
@@ -41,16 +40,20 @@ public abstract class AbstractCompassMojo extends AbstractMojo {
     }
 
 
-    protected AbstractMojoHelper getMojoHelper() throws MojoFailureException {
-        Properties pluginProperties = new Properties();
+    protected ScriptingContainer newScriptingContainer(String currentDirectory) throws MojoFailureException {
+        ScriptingContainer container = new ScriptingContainer(LocalContextScope.CONCURRENT);
+        container.setCompatVersion(CompatVersion.RUBY1_9);
+        container.setCurrentDirectory(currentDirectory);
+        container.setLoadPaths(loadPathHelper.getLoadPaths());
+        if(getLog().isDebugEnabled()) setRubyDebug(container);
+        return container;
+    }
 
-        try {
-            pluginProperties.load(AbstractCompassMojo.class.getResourceAsStream(PLUGIN_PROPERTIES_PATH));
-            return Boolean.valueOf(pluginProperties.getProperty(PROPERTY_JRUBY_GEMS_JAR))
-                    ? new GemJarMojoHelper() : new LocalMojoHelper();
-        } catch(IOException e) {
-            throw new MojoFailureException(PLUGIN_PROPERTIES_ERROR);
-        }
 
+    private void setRubyDebug(ScriptingContainer container) {
+        Ruby runtime = container.getProvider().getRuntime();
+        RubyBoolean rubyTrue = RubyBoolean.newBoolean(runtime, true);
+        runtime.setDebug(rubyTrue);
+        runtime.setVerbose(rubyTrue);
     }
 }

@@ -42,6 +42,6 @@ public class CompileMojo extends AbstractCompassMojo {
     private String target;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        getMojoHelper().compile(this);
+        getLog().info("Compiling css files.");
     }
 }

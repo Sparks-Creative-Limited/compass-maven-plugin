@@ -29,6 +29,11 @@ import java.io.File;
  */
 public class CreateMojo extends AbstractCompassMojo {
 
+    private static final String CREATING_COMPASS_MESSAGE = "Creating Compass resources.";
+    private static final String INVALID_DIRECTORY_ERROR = "Library install directory is invalid.";
+    private static final String UNDEFINED_DIRECTORY_ERROR = "Library install directory is undefined.";
+
+
     /**
      * Compass extensions to include with installation of the base libraries.
      * @parameter expression="${compass.extensions}"
@@ -43,9 +48,15 @@ public class CreateMojo extends AbstractCompassMojo {
 
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        getMojoHelper().create(this);
-    }
+        getLog().info(CREATING_COMPASS_MESSAGE);
+        File directory = getDirectory();
 
+        if(directory != null) {
+            if(directory.exists() || directory.mkdirs()) {
+                newScriptingContainer(directory.getAbsolutePath()).runScriptlet(createCompassScript("targetdir"));
+            } else throw new MojoFailureException(INVALID_DIRECTORY_ERROR);
+        } else throw new MojoFailureException(UNDEFINED_DIRECTORY_ERROR);
+    }
 
     public void setExtensions(String[] extensions) { this.extensions = extensions; }
 
@@ -55,5 +66,20 @@ public class CreateMojo extends AbstractCompassMojo {
 
     public File getDirectory() {
         return directory;
+    }
+
+
+    private String createCompassScript(String... args) {
+        return new StringBuilder()
+                .append("require 'rubygems'\n")
+                .append("require 'compass'\n")
+                .append("require 'compass/exec'\n")
+
+                .append("runner = Proc.new do\n")
+                .append("  Compass::Exec::SubCommandUI.new(['create', '").append(args[0]).append("']).run!\n")
+                .append("end\n")
+
+                .append("exit runner.call || 1")
+                .toString();
     }
 }

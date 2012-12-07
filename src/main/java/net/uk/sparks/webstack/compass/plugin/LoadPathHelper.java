@@ -13,10 +13,8 @@
  * the License.
  */
 
-package net.uk.sparks.webstack.compass.utils;
+package net.uk.sparks.webstack.compass.plugin;
 
-import net.uk.sparks.webstack.compass.plugin.AbstractCompassMojo;
-import net.uk.sparks.webstack.compass.plugin.MojoHelper;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
 
@@ -25,7 +23,7 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-public abstract class AbstractMojoHelper implements MojoHelper {
+public class LoadPathHelper {
 
     private static final String FILE_URI_PREFIX = "file:";
     private static final String JAR_ROOT_PREFIX = "!/";
@@ -36,7 +34,15 @@ public abstract class AbstractMojoHelper implements MojoHelper {
     private static final String SOURCE_FILE_ERROR = "Could not resolve source file for plugin jar.";
 
 
-    protected List<String> getLoadPaths(AbstractCompassMojo mojo) throws MojoFailureException {
+    private final AbstractCompassMojo mojo;
+
+
+    public LoadPathHelper(AbstractCompassMojo mojo) {
+        this.mojo = mojo;
+    }
+
+
+    public List<String> getLoadPaths() throws MojoFailureException {
         try {
             JarFile jarFile = new JarFile(((PluginDescriptor) mojo.getPluginContext().get("pluginDescriptor")).getSource());
             String pathRoot = new StringBuilder(FILE_URI_PREFIX).append(jarFile.getName()).append(JAR_ROOT_PREFIX).toString();

@@ -13,7 +13,7 @@
  * the License.
  */
 
-package net.uk.sparks.webstack.compass.utils;
+package net.uk.sparks.webstack.compass.plugin;
 
 import org.apache.maven.plugin.MojoFailureException;
 
@@ -22,12 +22,20 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class ResourceWriter {
+public class ResourceHelper {
 
-    private static final ClassLoader classloader = ResourceWriter.class.getClassLoader();
+    private static final ClassLoader classloader = ResourceHelper.class.getClassLoader();
 
 
-    public static void writeResource(String resource, File target) throws MojoFailureException {
+    private final AbstractCompassMojo mojo;
+
+
+    public ResourceHelper(AbstractCompassMojo mojo) {
+        this.mojo = mojo;
+    }
+
+
+    public void writeResource(String resource, File target) throws MojoFailureException {
 
         InputStream input = null;
         FileOutputStream output = null;
