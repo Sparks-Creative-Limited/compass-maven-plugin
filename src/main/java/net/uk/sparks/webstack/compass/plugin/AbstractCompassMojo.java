@@ -24,12 +24,22 @@ import org.jruby.RubyBoolean;
 import org.jruby.embed.LocalContextScope;
 import org.jruby.embed.ScriptingContainer;
 
+import java.io.File;
+
 
 public abstract class AbstractCompassMojo extends AbstractMojo {
+
+    private static final ClassLoader classloader = AbstractCompassMojo.class.getClassLoader();
+
+    private static final String COMPASS_RB_PATH = "META-INF/scripts/compass.rb";
+
+    private static final String COMPASS_RB_FILE = "compass.rb";
+
 
     private final LoadPathHelper loadPathHelper = new LoadPathHelper(this);
 
     private final ResourceHelper resourceHelper = new ResourceHelper(this);
+
 
     /** @parameter default-value="${project}" */
     private org.apache.maven.project.MavenProject mavenProject;
@@ -40,10 +50,15 @@ public abstract class AbstractCompassMojo extends AbstractMojo {
     }
 
 
-    protected ScriptingContainer newScriptingContainer(String currentDirectory) throws MojoFailureException {
+    protected void runCompass(ScriptingContainer container, String...ARGV) {
+        container.setArgv(ARGV);
+        container.runScriptlet(classloader.getResourceAsStream(COMPASS_RB_PATH), COMPASS_RB_FILE);
+    }
+
+    protected ScriptingContainer newScriptingContainer(File currentDirectory) throws MojoFailureException {
         ScriptingContainer container = new ScriptingContainer(LocalContextScope.CONCURRENT);
         container.setCompatVersion(CompatVersion.RUBY1_9);
-        container.setCurrentDirectory(currentDirectory);
+        container.setCurrentDirectory(currentDirectory.getAbsolutePath());
         container.setLoadPaths(loadPathHelper.getLoadPaths());
         if(getLog().isDebugEnabled()) setRubyDebug(container);
         return container;

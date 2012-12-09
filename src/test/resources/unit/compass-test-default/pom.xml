@@ -24,7 +24,7 @@
     </organization>
 
     <properties>
-        <jruby.gem.jar>true</jruby.gem.jar>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>

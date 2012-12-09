@@ -105,6 +105,9 @@
     <build>
         <resources>
             <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+            </resource>
+            <resource>
                 <directory>${properties.sources}</directory>
             </resource>
             <resource>
