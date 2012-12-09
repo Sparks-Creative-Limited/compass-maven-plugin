@@ -30,24 +30,26 @@ import java.io.File;
 public abstract class AbstractCompassMojo extends AbstractMojo {
 
     private static final ClassLoader classloader = AbstractCompassMojo.class.getClassLoader();
-
     private static final String COMPASS_RB_PATH = "META-INF/scripts/compass.rb";
-
     private static final String COMPASS_RB_FILE = "compass.rb";
 
 
-    private final LoadPathHelper loadPathHelper = new LoadPathHelper(this);
+    protected static final String CURRENT_DIRECTORY = ".";
+    protected static final String QUIET_FLAG = "-q";
 
+
+    private final LoadPathHelper loadPathHelper = new LoadPathHelper(this);
     private final ResourceHelper resourceHelper = new ResourceHelper(this);
 
 
     /** @parameter default-value="${project}" */
     private org.apache.maven.project.MavenProject mavenProject;
 
-
-    public MavenProject getMavenProject() {
-        return mavenProject;
-    }
+    /**
+     * Source directory for the installed compass project.
+     * @parameter expression="${compass.installDir}" default-value="${project.basedir}/src/main/resources/compass"
+     */
+    private File installDir;
 
 
     protected void runCompass(ScriptingContainer container, String...ARGV) {
@@ -62,6 +64,14 @@ public abstract class AbstractCompassMojo extends AbstractMojo {
         container.setLoadPaths(loadPathHelper.getLoadPaths());
         if(getLog().isDebugEnabled()) setRubyDebug(container);
         return container;
+    }
+
+    protected MavenProject getMavenProject() {
+        return mavenProject;
+    }
+
+    protected File getInstallDir() {
+        return installDir;
     }
 
 

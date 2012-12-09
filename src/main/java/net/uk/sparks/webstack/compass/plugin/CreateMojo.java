@@ -30,8 +30,6 @@ import java.io.File;
 public class CreateMojo extends AbstractCompassMojo {
 
     private static final String CREATE_COMMAND = "create";
-    private static final String CURRENT_DIRECTORY = ".";
-    private static final String QUIET_FLAG = "-q";
 
     private static final String CREATING_COMPASS_MESSAGE = "Creating Compass resources.";
     private static final String INVALID_DIRECTORY_ERROR = "Library install directory is invalid.";
@@ -43,12 +41,6 @@ public class CreateMojo extends AbstractCompassMojo {
      * @parameter expression="${compass.extensions}"
      */
     private String[] extensions;
-
-    /**
-     * Source directory for .sass and .scss files. Expressed relative to the project base directory.
-     * @parameter expression="${compass.installDir}" default-value="${project.basedir}/src/main/resources/compass"
-     */
-    private File installDir;
 
 
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -66,9 +58,5 @@ public class CreateMojo extends AbstractCompassMojo {
 
     public String[] getExtensions() {
         return extensions;
-    }
-
-    public File getInstallDir() {
-        return installDir;
     }
 }

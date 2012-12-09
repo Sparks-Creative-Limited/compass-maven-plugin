@@ -29,6 +29,12 @@ import java.io.File;
  */
 public class CompileMojo extends AbstractCompassMojo {
 
+    private static final String COMPILE_COMMAND = "compile";
+
+    private static final String COMPILING_COMPASS_MESSAGE = "Compiling compass resources.";
+    private static final String INVALID_DIRECTORY_ERROR = "Library install directory is invalid.";
+
+
     /**
      * Source directory for .sass and .scss files. Expressed relative to the project base directory.
      * @parameter expression="${compass.source}" default-value="${project.basedir}/src/main/resources/scss"
@@ -41,7 +47,13 @@ public class CompileMojo extends AbstractCompassMojo {
      */
     private String target;
 
+
     public void execute() throws MojoExecutionException, MojoFailureException {
-        getLog().info("Compiling css files.");
+        getLog().info(COMPILING_COMPASS_MESSAGE);
+        File directory = getInstallDir();
+
+        if(directory != null && directory.exists()) {
+            runCompass(newScriptingContainer(directory), COMPILE_COMMAND, CURRENT_DIRECTORY, QUIET_FLAG);
+        } else throw new MojoFailureException(INVALID_DIRECTORY_ERROR);
     }
 }
