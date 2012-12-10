@@ -85,7 +85,7 @@ public abstract class AbstractCompassMojo extends AbstractMojo {
 
     private ScriptingContainer newScriptingContainer(File currentDirectory) throws MojoFailureException {
         ScriptingContainer container = new ScriptingContainer(LocalContextScope.CONCURRENT);
-        container.setCompatVersion(CompatVersion.RUBY1_9);
+        container.setCompatVersion(CompatVersion.RUBY1_8);
         container.setCurrentDirectory(currentDirectory.getAbsolutePath());
         container.setLoadPaths(loadPathHelper.getLoadPaths());
         if(getLog().isDebugEnabled()) setRubyDebug(container);
