@@ -118,23 +118,6 @@
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
-                <artifactId>properties-maven-plugin</artifactId>
-                <version>1.0-alpha-2</version>
-                <executions>
-                    <execution>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>write-project-properties</goal>
-                        </goals>
-                        <configuration>
-                            <outputFile>${properties.sources}/META-INF/plugin.properties</outputFile>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>${exec-maven-plugin.version}</version>
                 <executions>
@@ -182,6 +165,8 @@
                                 <patch>compass-0.12.2_lib_compass_configuration_adapters.patch</patch>
                                 <patch>compass-0.12.2_lib_compass_frameworks.patch</patch>
                                 <patch>compass-0.12.2_lib_compass_sass_extensions_sprites_engines_chunky_png_engine.patch</patch>
+                                <patch>fssm-0.2.9_lib_fssm.patch</patch>
+                                <patch>fssm-0.2.9_lib_fssm_path.patch</patch>
                                 <patch>sass-3.2.3_lib_sass_importers_filesystem.patch</patch>
                             </patches>
                             <targetDirectory>${jruby.gems.sources}</targetDirectory>

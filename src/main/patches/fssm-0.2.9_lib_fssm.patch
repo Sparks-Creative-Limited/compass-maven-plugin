@@ -1,0 +1,12 @@
+--- META-INF/ruby.gems/gems/fssm-0.2.9/lib/fssm.rb	2012-12-10 15:52:32.000000000 +0000
++++ META-INF/ruby.gems/gems/fssm-0.2.9/lib/fssm.rb	2012-12-10 16:02:07.000000000 +0000
+@@ -72,9 +72,3 @@
+   end
+   
+ end
+-
+-STDERR.puts "\nDear developers making use of FSSM in your projects,\n"
+-STDERR.puts "FSSM is essentially dead at this point. Further development will"
+-STDERR.puts "be taking place in the new shared guard/listen project. Please"
+-STDERR.puts "let us know if you need help transitioning! ^_^b\n"
+-STDERR.puts "- Travis Tilley\n\n"
