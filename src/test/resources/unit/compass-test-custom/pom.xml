@@ -61,8 +61,8 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <installDir>${project.basedir}/src/main/compass</installDir>
-                    <cssDir>${project.basedir}/src/main/webapp/WEB-INF/css</cssDir>
+                    <installDir>${project.basedir}/src/main/resources/compass</installDir>
+                    <cssDir>${project.basedir}/src/main/resources/stylesheets</cssDir>
                 </configuration>
             </plugin>
         </plugins>

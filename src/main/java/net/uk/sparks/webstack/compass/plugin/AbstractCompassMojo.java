@@ -50,14 +50,14 @@ public abstract class AbstractCompassMojo extends AbstractMojo {
 
     /**
      * Source directory for the installed compass project.
-     * @parameter expression="${compass.installDir}" default-value="${project.basedir}/src/main/resources/compass"
+     * @parameter expression="${compass.installDir}" default-value="${project.basedir}/src/main/compass"
      */
     private File installDir;
 
 
     /**
      * Target directory for the compiled css files.
-     * @parameter expression="${compass.cssDir}" default-value="${project.basedir}/src/main/resources/compass/stylesheets"
+     * @parameter expression="${compass.cssDir}" default-value="${project.basedir}/src/main/webapp/WEB-INF/css"
      */
     private File cssDir;
 
