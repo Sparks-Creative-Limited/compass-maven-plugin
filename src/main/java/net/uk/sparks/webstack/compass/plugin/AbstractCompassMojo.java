@@ -17,7 +17,6 @@ package net.uk.sparks.webstack.compass.plugin;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.project.MavenProject;
 import org.jruby.CompatVersion;
 import org.jruby.Ruby;
 import org.jruby.RubyBoolean;
@@ -25,6 +24,9 @@ import org.jruby.embed.LocalContextScope;
 import org.jruby.embed.ScriptingContainer;
 
 import java.io.File;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 
 public abstract class AbstractCompassMojo extends AbstractMojo {
@@ -33,17 +35,18 @@ public abstract class AbstractCompassMojo extends AbstractMojo {
     private static final String COMPASS_RB_PATH = "META-INF/scripts/compass.rb";
     private static final String COMPASS_RB_FILE = "compass.rb";
 
+    private static final String CURRENT_DIRECTORY = ".";
+    private static final String CSS_DIR_FLAG = "--css-dir";
+    private static final String NO_LINE_COMMENTS_FLAG = "--no-line-comments";
+    private static final String QUIET_FLAG = "-q";
+    private static final String TRACE_FLAG = "--trace";
 
-    protected static final String CURRENT_DIRECTORY = ".";
-    protected static final String QUIET_FLAG = "-q";
+    private static final String INVALID_DIRECTORY_ERROR = "Library install directory is invalid.";
 
 
     private final LoadPathHelper loadPathHelper = new LoadPathHelper(this);
-    private final ResourceHelper resourceHelper = new ResourceHelper(this);
+    private final FilePathHelper filePathHelper = new FilePathHelper();
 
-
-    /** @parameter default-value="${project}" */
-    private org.apache.maven.project.MavenProject mavenProject;
 
     /**
      * Source directory for the installed compass project.
@@ -52,12 +55,35 @@ public abstract class AbstractCompassMojo extends AbstractMojo {
     private File installDir;
 
 
-    protected void runCompass(ScriptingContainer container, String...ARGV) {
-        container.setArgv(ARGV);
-        container.runScriptlet(classloader.getResourceAsStream(COMPASS_RB_PATH), COMPASS_RB_FILE);
+    /**
+     * Target directory for the compiled css files.
+     * @parameter expression="${compass.cssDir}" default-value="${project.basedir}/src/main/resources/compass/stylesheets"
+     */
+    private File cssDir;
+
+
+    protected void runCompass(String infoMessage) throws MojoFailureException {
+        getLog().info(infoMessage);
+
+        if(installDir != null && installDir.exists()) {
+            ScriptingContainer container = newScriptingContainer(installDir);
+            container.setArgv(compileArgs());
+            container.runScriptlet(classloader.getResourceAsStream(COMPASS_RB_PATH), COMPASS_RB_FILE);
+        } else throw new MojoFailureException(INVALID_DIRECTORY_ERROR);
     }
 
-    protected ScriptingContainer newScriptingContainer(File currentDirectory) throws MojoFailureException {
+    protected abstract String getCommand();
+
+    protected List<String> getArguments() {
+        return Collections.emptyList();
+    }
+
+    protected File getInstallDir() {
+        return installDir;
+    }
+
+
+    private ScriptingContainer newScriptingContainer(File currentDirectory) throws MojoFailureException {
         ScriptingContainer container = new ScriptingContainer(LocalContextScope.CONCURRENT);
         container.setCompatVersion(CompatVersion.RUBY1_9);
         container.setCurrentDirectory(currentDirectory.getAbsolutePath());
@@ -66,19 +92,23 @@ public abstract class AbstractCompassMojo extends AbstractMojo {
         return container;
     }
 
-    protected MavenProject getMavenProject() {
-        return mavenProject;
-    }
-
-    protected File getInstallDir() {
-        return installDir;
-    }
-
-
     private void setRubyDebug(ScriptingContainer container) {
         Ruby runtime = container.getProvider().getRuntime();
         RubyBoolean rubyTrue = RubyBoolean.newBoolean(runtime, true);
         runtime.setDebug(rubyTrue);
         runtime.setVerbose(rubyTrue);
+    }
+
+    private String[] compileArgs() {
+        List<String> args = new LinkedList<String>();
+        args.add(getCommand());
+        args.add(CURRENT_DIRECTORY);
+        args.add(CSS_DIR_FLAG);
+        args.add(filePathHelper.getRelativePath(installDir, cssDir));
+        args.add(NO_LINE_COMMENTS_FLAG);
+        args.add(QUIET_FLAG);
+        args.addAll(getArguments());
+        if(getLog().isDebugEnabled()) args.add(TRACE_FLAG);
+        return args.toArray(new String[args.size()]);
     }
 }

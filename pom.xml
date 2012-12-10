@@ -64,7 +64,7 @@
         <jruby.version>1.6.7</jruby.version>
 
         <maven-plugin-api.version>2.0</maven-plugin-api.version>
-        <junit.version>3.8.1</junit.version>
+        <junit.version>4.10</junit.version>
 
         <exec-maven-plugin.version>1.2.1</exec-maven-plugin.version>
         <maven-jar-plugin.version>2.4</maven-jar-plugin.version>

@@ -18,8 +18,6 @@ package net.uk.sparks.webstack.compass.plugin;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
-import java.io.File;
-
 
 /**
  * Compiles .sass and .scss files into .css
@@ -32,28 +30,14 @@ public class CompileMojo extends AbstractCompassMojo {
     private static final String COMPILE_COMMAND = "compile";
 
     private static final String COMPILING_COMPASS_MESSAGE = "Compiling compass resources.";
-    private static final String INVALID_DIRECTORY_ERROR = "Library install directory is invalid.";
-
-
-    /**
-     * Source directory for .sass and .scss files. Expressed relative to the project base directory.
-     * @parameter expression="${compass.source}" default-value="${project.basedir}/src/main/resources/scss"
-     */
-    private File source;
-
-    /**
-     * Target directory for .css resources. Expressed relative to the base url of the intended service.
-     * @parameter expression="${compass.target}" default-value="css"
-     */
-    private String target;
 
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        getLog().info(COMPILING_COMPASS_MESSAGE);
-        File directory = getInstallDir();
+        runCompass(COMPILING_COMPASS_MESSAGE);
+    }
 
-        if(directory != null && directory.exists()) {
-            runCompass(newScriptingContainer(directory), COMPILE_COMMAND, CURRENT_DIRECTORY, QUIET_FLAG);
-        } else throw new MojoFailureException(INVALID_DIRECTORY_ERROR);
+
+    protected String getCommand() {
+        return COMPILE_COMMAND;
     }
 }

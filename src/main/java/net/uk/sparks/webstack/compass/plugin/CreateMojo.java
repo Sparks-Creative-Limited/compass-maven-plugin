@@ -32,7 +32,6 @@ public class CreateMojo extends AbstractCompassMojo {
     private static final String CREATE_COMMAND = "create";
 
     private static final String CREATING_COMPASS_MESSAGE = "Creating Compass resources.";
-    private static final String INVALID_DIRECTORY_ERROR = "Library install directory is invalid.";
     private static final String UNDEFINED_DIRECTORY_ERROR = "Library install directory is undefined.";
 
 
@@ -44,19 +43,18 @@ public class CreateMojo extends AbstractCompassMojo {
 
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        getLog().info(CREATING_COMPASS_MESSAGE);
         File directory = getInstallDir();
-
-        if(directory != null) {
-            if(directory.exists() || directory.mkdirs()) {
-                runCompass(newScriptingContainer(directory), CREATE_COMMAND, CURRENT_DIRECTORY, QUIET_FLAG);
-            } else throw new MojoFailureException(INVALID_DIRECTORY_ERROR);
+        if(directory != null && (directory.exists() || directory.mkdirs())) {
+            runCompass(CREATING_COMPASS_MESSAGE);
         } else throw new MojoFailureException(UNDEFINED_DIRECTORY_ERROR);
     }
 
     public void setExtensions(String[] extensions) { this.extensions = extensions; }
 
-    public String[] getExtensions() {
-        return extensions;
+    public String[] getExtensions() { return extensions; }
+
+
+    protected String getCommand() {
+        return CREATE_COMMAND;
     }
 }

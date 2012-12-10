@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>net.uk.sparks.webstack</groupId>
-    <artifactId>compass-test-default</artifactId>
+    <artifactId>compass-test-custom</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <inceptionYear>2012</inceptionYear>
@@ -48,6 +48,10 @@
                         <goals><goal>create</goal></goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <installDir>${project.basedir}/compassRoot</installDir>
+                    <cssDir>${project.basedir}/src/main/webapp/WEB-INF/css</cssDir>
+                </configuration>
             </plugin>
 
         </plugins>
