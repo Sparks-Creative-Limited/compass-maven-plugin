@@ -21,6 +21,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 import java.util.jar.JarFile;
 
 /**
@@ -33,14 +34,15 @@ import java.util.jar.JarFile;
 public class CreateMojo extends AbstractCompassMojo {
 
     private enum FRAMEWORK {
-        COMPASS("compass", "compass-%s/frameworks/compass/"),
-        BLUEPRINT("blueprint", "compass-%s/frameworks/blueprint/"),
-        BLUEPRINT_BASIC("blueprint/basic", "compass-%s/frameworks/blueprint/"),
-        BLUEPRINT_SEMANTIC("blueprint/semantic", "compass-%s/frameworks/blueprint/"),
-        ZEN_GRIDS("zen-grids", "zen-grids-1.2/"),
-        EXTERNAL("", "");
+        COMPASS("compass", "compass-%s/frameworks/compass/", "gem.compass.version"),
+        BLUEPRINT("blueprint", "compass-%s/frameworks/blueprint/", "gem.compass.version"),
+        BLUEPRINT_BASIC("blueprint/basic", "compass-%s/frameworks/blueprint/", "gem.compass.version"),
+        BLUEPRINT_SEMANTIC("blueprint/semantic", "compass-%s/frameworks/blueprint/", "gem.compass.version"),
+        ZEN_GRIDS("zen-grids", "zen-grids-%s/", "gem.zen-grids.version"),
+        EXTERNAL("", "", "");
 
         private static final String GEMS_ROOT = "META-INF/ruby.gems/gems/";
+        private static final String GEM_VERSION_ERROR = "Could not determine gem version for ";
 
         public static FRAMEWORK get(String name) {
             for(FRAMEWORK f : FRAMEWORK.values()) if(f.name.equals(name)) return f;
@@ -48,25 +50,28 @@ public class CreateMojo extends AbstractCompassMojo {
         }
 
 
-        public String getPath(String version) {
-            return String.format(path, version);
+        public String getPath(Properties versions) throws MojoFailureException {
+            String version = versions.getProperty(versionKey);
+            if(null != version) return String.format(path, version);
+            else throw new MojoFailureException(GEM_VERSION_ERROR + name);
         }
 
 
         final String name;
         final String path;
+        final String versionKey;
 
 
-        private FRAMEWORK(String name, String path) {
+        private FRAMEWORK(String name, String path, String versionKey) {
             this.name = name;
             this.path = GEMS_ROOT + path;
+            this.versionKey = versionKey;
         }
     }
 
     private static final String CREATE_COMMAND = "create";
     private static final String USING_ARGUMENT = "--using";
     private static final String FRAMEWORKS_DIR = "frameworks";
-    private static final String COMPASS_VERSION = "0.12.2";
 
     private static final String CREATING_COMPASS_MESSAGE = "Creating Compass resources.";
     private static final String UNDEFINED_DIRECTORY_ERROR = "Library install directory is undefined.";
@@ -128,7 +133,7 @@ public class CreateMojo extends AbstractCompassMojo {
         File frameworks = new File(getInstallDir(), FRAMEWORKS_DIR);
         if(frameworks.exists() || frameworks.mkdirs()) {
             JarFile plugin = resourceHelper.getJar();
-            resourceHelper.writeResource(plugin, FRAMEWORK.COMPASS.getPath(COMPASS_VERSION), frameworks);
+            resourceHelper.writeResource(plugin, FRAMEWORK.COMPASS.getPath(getVersions()), frameworks);
 
             if(extensions.length > 0) {
                 FRAMEWORK framework;
@@ -138,7 +143,7 @@ public class CreateMojo extends AbstractCompassMojo {
                         case EXTERNAL:
                             break;
                         default:
-                            resourceHelper.writeResource(plugin, framework.getPath(COMPASS_VERSION), frameworks);
+                            resourceHelper.writeResource(plugin, framework.getPath(getVersions()), frameworks);
                             break;
                     }
                 }

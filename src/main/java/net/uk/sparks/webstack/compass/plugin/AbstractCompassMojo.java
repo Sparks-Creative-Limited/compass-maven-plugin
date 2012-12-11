@@ -24,14 +24,19 @@ import org.jruby.embed.LocalContextScope;
 import org.jruby.embed.ScriptingContainer;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 
 
 public abstract class AbstractCompassMojo extends AbstractMojo {
 
     private static final ClassLoader classloader = AbstractCompassMojo.class.getClassLoader();
+
+    private static final String VERSIONS_PATH = "META-INF/properties/version.properties";
+
     private static final String COMPASS_RB_PATH = "META-INF/scripts/compass.rb";
     private static final String COMPASS_RB_FILE = "compass.rb";
 
@@ -42,6 +47,7 @@ public abstract class AbstractCompassMojo extends AbstractMojo {
     private static final String TRACE_FLAG = "--trace";
 
     private static final String INVALID_DIRECTORY_ERROR = "Library install directory is invalid.";
+    private static final String GEM_VERSIONS_ERROR = "Could not resolve gem versions.";
 
 
     private final LoadPathHelper loadPathHelper = new LoadPathHelper(this);
@@ -60,6 +66,9 @@ public abstract class AbstractCompassMojo extends AbstractMojo {
      * @parameter expression="${compass.cssDir}" default-value="${project.basedir}/src/main/webapp/WEB-INF/css"
      */
     private File cssDir;
+
+
+    private Properties versions;
 
 
     protected void runCompass(String infoMessage) throws MojoFailureException {
@@ -82,6 +91,14 @@ public abstract class AbstractCompassMojo extends AbstractMojo {
         return installDir;
     }
 
+    protected Properties getVersions() throws MojoFailureException {
+        if(versions == null) try {
+            versions = new Properties();
+            versions.load(classloader.getResourceAsStream(VERSIONS_PATH));
+        } catch (IOException e) { throw new MojoFailureException(GEM_VERSIONS_ERROR); }
+
+        return versions;
+    }
 
     private ScriptingContainer newScriptingContainer(File currentDirectory) throws MojoFailureException {
         ScriptingContainer container = new ScriptingContainer(LocalContextScope.CONCURRENT);

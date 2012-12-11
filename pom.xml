@@ -57,17 +57,15 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.generatedSources>${project.build.directory}/generated-sources</project.build.generatedSources>
 
-        <gem.sass.version>3.2.3</gem.sass.version>
-        <gem.compass.version>0.12.2</gem.compass.version>
-        <gem.zen-grids.version>1.2</gem.zen-grids.version>
-        <jruby.version>1.6.7</jruby.version>
-
-        <maven-plugin-api.version>2.0</maven-plugin-api.version>
-        <junit.version>4.10</junit.version>
-
+        <properties-maven-plugin.version>1.0-alpha-2</properties-maven-plugin.version>
         <exec-maven-plugin.version>1.2.1</exec-maven-plugin.version>
         <maven-jar-plugin.version>2.4</maven-jar-plugin.version>
 
+        <maven-plugin-api.version>2.0</maven-plugin-api.version>
+        <jruby.version>1.6.7</jruby.version>
+        <junit.version>4.10</junit.version>
+
+        <jruby.gems.versions>${basedir}/src/main/resources/META-INF/properties/version.properties</jruby.gems.versions>
         <jruby.gems.sources>${project.build.generatedSources}/rubygems</jruby.gems.sources>
         <jruby.install.args>--no-rdoc --no-ri</jruby.install.args>
         <jruby.install.cmd.pre>-classpath %classpath org.jruby.Main -S gem install</jruby.install.cmd.pre>
@@ -106,15 +104,30 @@
             <resource><directory>${project.basedir}/src/main/resources</directory></resource>
             <resource><directory>${jruby.gems.sources}</directory></resource>
         </resources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>${properties-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals><goal>read-project-properties</goal></goals>
+                        <configuration>
+                            <files><file>${jruby.gems.versions}</file></files>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 
     <profiles>
         <profile>
             <id>install-gems</id>
             <activation>
-                <property>
-                    <name>!gems.install.skip</name>
-                </property>
+                <property><name>!gems.install.skip</name></property>
             </activation>
 
             <build>
