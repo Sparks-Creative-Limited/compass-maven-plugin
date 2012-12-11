@@ -33,28 +33,39 @@ import java.util.jar.JarFile;
 public class CreateMojo extends AbstractCompassMojo {
 
     private enum FRAMEWORK {
-        BLUEPRINT("blueprint"),
-        BLUEPRINT_BASIC("blueprint/basic"),
-        BLUEPRINT_SEMANTIC("blueprint/semantic"),
-        EXTERNAL("");
+        COMPASS("compass", "compass-%s/frameworks/compass/"),
+        BLUEPRINT("blueprint", "compass-%s/frameworks/blueprint/"),
+        BLUEPRINT_BASIC("blueprint/basic", "compass-%s/frameworks/blueprint/"),
+        BLUEPRINT_SEMANTIC("blueprint/semantic", "compass-%s/frameworks/blueprint/"),
+        ZEN_GRIDS("zen-grids", "zen-grids-1.2/"),
+        EXTERNAL("", "");
+
+        private static final String GEMS_ROOT = "META-INF/ruby.gems/gems/";
 
         public static FRAMEWORK get(String name) {
             for(FRAMEWORK f : FRAMEWORK.values()) if(f.name.equals(name)) return f;
             return EXTERNAL;
         }
 
-        private final String name;
 
-        private FRAMEWORK(String name) {
+        public String getPath(String version) {
+            return String.format(path, version);
+        }
+
+
+        final String name;
+        final String path;
+
+
+        private FRAMEWORK(String name, String path) {
             this.name = name;
+            this.path = GEMS_ROOT + path;
         }
     }
 
     private static final String CREATE_COMMAND = "create";
     private static final String USING_ARGUMENT = "--using";
     private static final String FRAMEWORKS_DIR = "frameworks";
-    private static final String BLUEPRINT_FRAMEWORK = "META-INF/ruby.gems/gems/compass-%s/frameworks/blueprint/";
-    private static final String COMPASS_FRAMEWORK = "META-INF/ruby.gems/gems/compass-%s/frameworks/compass/";
     private static final String COMPASS_VERSION = "0.12.2";
 
     private static final String CREATING_COMPASS_MESSAGE = "Creating Compass resources.";
@@ -92,26 +103,20 @@ public class CreateMojo extends AbstractCompassMojo {
     protected List<String> getArguments() {
         List<String> arguments = new LinkedList<String>();
         boolean blueprintAdded = false;
+        FRAMEWORK framework;
 
         for(String extension : extensions) {
-            switch(FRAMEWORK.get(extension)) {
+            switch(framework = FRAMEWORK.get(extension)) {
                 case BLUEPRINT:
                 case BLUEPRINT_BASIC:
-                    if(!blueprintAdded) {
-                        arguments.add(USING_ARGUMENT);
-                        arguments.add(FRAMEWORK.BLUEPRINT_BASIC.name);
-                        blueprintAdded = true;
-                    }
-                    break;
                 case BLUEPRINT_SEMANTIC:
                     if(!blueprintAdded) {
                         arguments.add(USING_ARGUMENT);
-                        arguments.add(FRAMEWORK.BLUEPRINT_SEMANTIC.name);
+                        arguments.add(framework.name);
                         blueprintAdded = true;
                     }
                     break;
-                default:
-                    // Do nothing.
+                default: // Do nothing.
                     break;
             }
         }
@@ -123,20 +128,17 @@ public class CreateMojo extends AbstractCompassMojo {
         File frameworks = new File(getInstallDir(), FRAMEWORKS_DIR);
         if(frameworks.exists() || frameworks.mkdirs()) {
             JarFile plugin = resourceHelper.getJar();
-            resourceHelper.writeResource(plugin, String.format(COMPASS_FRAMEWORK, COMPASS_VERSION), frameworks);
+            resourceHelper.writeResource(plugin, FRAMEWORK.COMPASS.getPath(COMPASS_VERSION), frameworks);
 
             if(extensions.length > 0) {
+                FRAMEWORK framework;
 
                 for(String extension : extensions) {
-                    switch(FRAMEWORK.get(extension)) {
-                        case BLUEPRINT:
-                        case BLUEPRINT_BASIC:
-                        case BLUEPRINT_SEMANTIC:
-                            resourceHelper.writeResource(plugin, String.format(BLUEPRINT_FRAMEWORK, COMPASS_VERSION), frameworks);
-                            break;
+                    switch(framework = FRAMEWORK.get(extension)) {
                         case EXTERNAL:
+                            break;
                         default:
-                            // Do nothing.
+                            resourceHelper.writeResource(plugin, framework.getPath(COMPASS_VERSION), frameworks);
                             break;
                     }
                 }

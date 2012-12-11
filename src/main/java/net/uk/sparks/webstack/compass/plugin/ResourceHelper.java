@@ -69,7 +69,8 @@ public class ResourceHelper extends AbstractJarHelper {
     private void writeResource(JarFile jar, JarEntry resource, int jarRootIndex, File parentDir) throws MojoFailureException {
         String resourceName = resource.getName().substring(jarRootIndex);
         int fileIndex = resourceName.lastIndexOf(SEPARATOR);
-        File targetDir = new File(parentDir, resourceName.substring(0, fileIndex));
+        File targetDir = fileIndex < 0
+                ? parentDir : new File(parentDir, resourceName.substring(0, fileIndex));
 
         if(targetDir.exists() || targetDir.mkdirs()) {
             InputStream input = null;
@@ -77,7 +78,8 @@ public class ResourceHelper extends AbstractJarHelper {
 
             try {
                 input = jar.getInputStream(resource);
-                output = new FileOutputStream(new File(targetDir, resourceName.substring(fileIndex)));
+                output = new FileOutputStream(new File(targetDir, fileIndex < 0
+                        ? resourceName : resourceName.substring(fileIndex)));
                 writeResource(input, output);
             } catch (IOException e) {
                 throw new MojoFailureException(e.getMessage());

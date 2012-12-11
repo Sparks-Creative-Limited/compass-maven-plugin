@@ -65,6 +65,7 @@
                     <cssDir>${project.basedir}/src/main/resources/stylesheets</cssDir>
                     <extensions>
                         <extension>blueprint/semantic</extension>
+                        <extension>zen-grids</extension>
                     </extensions>
                 </configuration>
             </plugin>
