@@ -21,44 +21,80 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Enumeration;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
-public class ResourceHelper {
-
-    private static final ClassLoader classloader = ResourceHelper.class.getClassLoader();
-
-
-    private final AbstractCompassMojo mojo;
+public class ResourceHelper extends AbstractJarHelper {
 
 
     public ResourceHelper(AbstractCompassMojo mojo) {
-        this.mojo = mojo;
+        super(mojo);
     }
 
 
-    public void writeResource(String resource, File target) throws MojoFailureException {
+    public void writeResource(JarFile jar, String resourceRoot, File targetDir) throws MojoFailureException {
+        JarEntry rootResource = jar.getJarEntry(resourceRoot);
 
-        InputStream input = null;
-        FileOutputStream output = null;
+        if(rootResource != null) {
+            int fileIndex = resourceRoot.lastIndexOf(SEPARATOR);
 
-        try {
-            input = classloader.getResourceAsStream(resource);
+            if(rootResource.isDirectory()) {
+                if(fileIndex == resourceRoot.length() - 1) {
+                    fileIndex = resourceRoot.substring(0, fileIndex).lastIndexOf(SEPARATOR);
+                }
 
-            if(!target.exists()) target.createNewFile();
-            output = new FileOutputStream(target);
+                File rootDir = new File(targetDir, resourceRoot.substring(fileIndex));
 
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = input.read(buffer)) != -1) output.write(buffer, 0, bytesRead);
+                if(rootDir.exists() || rootDir.mkdirs()) {
+                    int jarRootIndex = resourceRoot.length();
+                    Set<JarEntry> resources = new TreeSet<JarEntry>(new JarEntryComparator(jarRootIndex));
+                    JarEntry entry = null;
 
-        } catch (IOException e) {
-            throw new MojoFailureException(e.getMessage());
-        } finally {
-            try {
-                if(output != null) output.close();
-                if(input != null) input.close();
-            } catch (IOException e) {
-                throw new MojoFailureException(e.getMessage());
+                    for(Enumeration<JarEntry> entries = jar.entries(); entries.hasMoreElements(); entry = entries.nextElement()) {
+                        if(entry != null && !entry.isDirectory() && entry.getName().startsWith(resourceRoot)) resources.add(entry);
+                    }
+
+                    for(JarEntry resource : resources) writeResource(jar, resource, jarRootIndex, rootDir);
+                }
+            } else {
+                writeResource(jar, rootResource, fileIndex, targetDir);
             }
         }
+    }
+
+
+    private void writeResource(JarFile jar, JarEntry resource, int jarRootIndex, File parentDir) throws MojoFailureException {
+        String resourceName = resource.getName().substring(jarRootIndex);
+        int fileIndex = resourceName.lastIndexOf(SEPARATOR);
+        File targetDir = new File(parentDir, resourceName.substring(0, fileIndex));
+
+        if(targetDir.exists() || targetDir.mkdirs()) {
+            InputStream input = null;
+            FileOutputStream output = null;
+
+            try {
+                input = jar.getInputStream(resource);
+                output = new FileOutputStream(new File(targetDir, resourceName.substring(fileIndex)));
+                writeResource(input, output);
+            } catch (IOException e) {
+                throw new MojoFailureException(e.getMessage());
+            } finally {
+                try {
+                    if(output != null) output.close();
+                    if(input != null) input.close();
+                } catch (IOException e) {
+                    throw new MojoFailureException(e.getMessage());
+                }
+            }
+        }
+    }
+
+    private void writeResource(InputStream input, FileOutputStream output) throws IOException {
+        byte[] buffer = new byte[1024];
+        int bytesRead;
+        while ((bytesRead = input.read(buffer)) != -1) output.write(buffer, 0, bytesRead);
     }
 }

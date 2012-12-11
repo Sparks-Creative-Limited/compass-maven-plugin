@@ -63,6 +63,9 @@
                 <configuration>
                     <installDir>${project.basedir}/src/main/resources/compass</installDir>
                     <cssDir>${project.basedir}/src/main/resources/stylesheets</cssDir>
+                    <extensions>
+                        <extension>blueprint/semantic</extension>
+                    </extensions>
                 </configuration>
             </plugin>
         </plugins>
