@@ -40,6 +40,8 @@ public class CommandInjectionHelper {
         } catch (IOException e) { throw new MojoFailureException(SCRIPT_GENERATION_ERROR); }
 
         script = out.toString();
+
+        if(mojo.getLog().isDebugEnabled()) mojo.getLog().debug(script);
     }
 
     public InputStream getInputStream() {

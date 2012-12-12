@@ -5,11 +5,6 @@ require 'compass'
 require 'compass/exec'
 
 runner = Proc.new do
-    Dir.entries('frameworks').each do |framework|
-        unless "#{framework}" == '.' || "#{framework}" == '..'
-            Compass::Frameworks.register_directory("frameworks/#{framework}")
-        end
-    end
 
 # command-injection
     Compass::Exec::SubCommandUI.new(ARGV).run!

@@ -21,7 +21,6 @@ import org.apache.maven.plugin.MojoFailureException;
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 import java.util.jar.JarFile;
 
 /**
@@ -33,71 +32,19 @@ import java.util.jar.JarFile;
  */
 public class CreateMojo extends AbstractCompassMojo {
 
-    private enum FRAMEWORK {
-        COMPASS("compass", "compass-%s/frameworks/compass/", "gem.compass.version", false),
-        BLUEPRINT("blueprint", "compass-%s/frameworks/blueprint/", "gem.compass.version", true),
-        BLUEPRINT_BASIC("blueprint/basic", "compass-%s/frameworks/blueprint/", "gem.compass.version", true),
-        BLUEPRINT_SEMANTIC("blueprint/semantic", "compass-%s/frameworks/blueprint/", "gem.compass.version", true),
-        COMPASS_960("960","compass-960-plugin-%s/","gem.960.version", true),
-        COMPASS_YUI("yui","yui-compass-plugin-%s/","gem.yui.version", true),
-        ZEN_GRIDS("zen-grids", "zen-grids-%s/", "gem.zen-grids.version", true),
-        ZURB_FOUNDATION("zurb-foundation", "foundation-sass-%s/", "gem.zurb-foundation.version", true),
-        EXTERNAL("", "", "", false);
-
-        private static final String GEMS_ROOT = "META-INF/ruby.gems/gems/";
-        private static final String GEM_VERSION_ERROR = "Could not determine gem version for ";
-
-        static FRAMEWORK get(String name) {
-            for(FRAMEWORK f : FRAMEWORK.values()) if(f.name.equals(name)) return f;
-            return EXTERNAL;
-        }
-
-
-        String getDir(Properties versions) throws MojoFailureException {
-            String version = versions.getProperty(versionKey);
-            if(null != version) return String.format(dir, version);
-            else throw new MojoFailureException(GEM_VERSION_ERROR + name);
-        }
-
-        String getPath(Properties versions) throws MojoFailureException {
-            return GEMS_ROOT + getDir(versions);
-        }
-
-
-        final String name;
-        final String dir;
-        final String versionKey;
-        final boolean usingArg;
-
-
-        private FRAMEWORK(String name, String dir, String versionKey, boolean usingArg) {
-            this.name = name;
-            this.dir = dir;
-            this.versionKey = versionKey;
-            this.usingArg = usingArg;
-        }
-    }
-
     private static final String CREATE_COMMAND = "create";
     private static final String USING_ARGUMENT = "--using";
-    private static final String FRAMEWORKS_DIR = "frameworks";
+    private static final String frameworks_DIR = "frameworks";
 
     private static final String CREATING_COMPASS_MESSAGE = "Creating Compass resources.";
     private static final String UNDEFINED_DIRECTORY_ERROR = "Library install directory is undefined.";
-    private static final String FRAMEWORK_INSTALL_ERROR = "Could not install frameworks.";
+    private static final String Framework_INSTALL_ERROR = "Could not install frameworks.";
 
 
     private final ResourceHelper resourceHelper = new ResourceHelper(this);
 
 
-    /**
-     * Compass extensions to include with installation of the base libraries.
-     * @parameter expression="${compass.extensions}"
-     */
-    private String[] extensions;
-
     private List<String> arguments;
-    private List<String> extraCommands;
 
 
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -107,8 +54,6 @@ public class CreateMojo extends AbstractCompassMojo {
             runCompass(CREATING_COMPASS_MESSAGE);
         } else throw new MojoFailureException(UNDEFINED_DIRECTORY_ERROR);
     }
-
-    public void setExtensions(String[] extensions) { this.extensions = extensions; }
 
 
     @Override
@@ -122,23 +67,19 @@ public class CreateMojo extends AbstractCompassMojo {
         return arguments;
     }
 
-    @Override
-    protected List<String> getExtraCommands() throws MojoFailureException {
-        if(null == extraCommands) parseExtensions();
-        return extraCommands;
-    }
 
     private void installExtensions() throws MojoFailureException {
-        File frameworks = new File(getInstallDir(), FRAMEWORKS_DIR);
+        File frameworks = new File(getInstallDir(), frameworks_DIR);
         if(frameworks.exists() || frameworks.mkdirs()) {
             JarFile plugin = resourceHelper.getJar();
-            resourceHelper.writeResource(plugin, FRAMEWORK.COMPASS.getPath(getVersions()), frameworks);
+            resourceHelper.writeResource(plugin, Framework.COMPASS.getPath(getVersions()), frameworks);
+            String[] extensions = getExtensions();
 
             if(extensions.length > 0) {
-                FRAMEWORK framework;
+                Framework framework;
 
                 for(String extension : extensions) {
-                    switch(framework = FRAMEWORK.get(extension)) {
+                    switch(framework = Framework.get(extension)) {
                         case EXTERNAL:
                             break;
                         default:
@@ -147,27 +88,25 @@ public class CreateMojo extends AbstractCompassMojo {
                     }
                 }
             }
-        } else throw new MojoFailureException(FRAMEWORK_INSTALL_ERROR);
+        } else throw new MojoFailureException(Framework_INSTALL_ERROR);
     }
 
-    private void parseExtensions() throws MojoFailureException {
+    @Override
+    protected void parseExtensions() throws MojoFailureException {
+        super.parseExtensions();
         arguments = new LinkedList<String>();
-        extraCommands = new LinkedList<String>();
+        Framework framework;
 
+        String[] extensions = getExtensions();
         boolean usingArgFlag = true;
-        FRAMEWORK framework;
 
         for(String extension : extensions) {
-            if((framework = FRAMEWORK.get(extension)).usingArg) {
+            if((framework = Framework.get(extension)).usingArg) {
                 if(usingArgFlag) {
                     arguments.add(USING_ARGUMENT);
                     arguments.add(framework.name);
                     usingArgFlag = false;
                 }
-
-                extraCommands.add(new StringBuilder("Compass::Frameworks.register(\"").append(framework.name)
-                        .append("\", :path => \"frameworks/").append(framework.getDir(getVersions())).append("\")")
-                        .toString());
             }
         }
     }

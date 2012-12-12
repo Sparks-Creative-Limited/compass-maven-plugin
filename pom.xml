@@ -220,6 +220,7 @@
                                         <patch>fssm-0.2.9_lib_fssm.patch</patch>
                                         <patch>fssm-0.2.9_lib_fssm_path.patch</patch>
                                         <patch>sass-3.2.3_lib_sass_importers_filesystem.patch</patch>
+                                        <patch>yui-compass-plugin-0.3_templates_project_screen.patch</patch>
                                     </patches>
                                     <targetDirectory>${jruby.gems.sources}</targetDirectory>
                                 </configuration>

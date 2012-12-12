@@ -69,7 +69,17 @@ public abstract class AbstractCompassMojo extends AbstractMojo {
     private File cssDir;
 
 
+    /**
+     * Compass extensions to include with installation of the base libraries.
+     * @parameter expression="${compass.extensions}"
+     */
+    private String[] extensions;
+
     private Properties versions;
+    private List<String> extraCommands;
+
+
+    public void setExtensions(String[] extensions) { this.extensions = extensions; }
 
 
     protected void runCompass(String infoMessage) throws MojoFailureException {
@@ -82,19 +92,15 @@ public abstract class AbstractCompassMojo extends AbstractMojo {
         } else throw new MojoFailureException(INVALID_DIRECTORY_ERROR);
     }
 
-    protected abstract String getCommand();
-
-    protected List<String> getArguments() throws MojoFailureException {
-        return Collections.emptyList();
-    }
-
-    protected List<String> getExtraCommands() throws MojoFailureException {
-        return Collections.emptyList();
-    }
-
     protected File getInstallDir() {
         return installDir;
     }
+
+    protected String[] getExtensions() {
+        return extensions;
+    }
+
+    protected abstract String getCommand();
 
     protected Properties getVersions() throws MojoFailureException {
         if(versions == null) try {
@@ -105,10 +111,38 @@ public abstract class AbstractCompassMojo extends AbstractMojo {
         return versions;
     }
 
+    protected List<String> getArguments() throws MojoFailureException {
+        return Collections.emptyList();
+    }
+
+    protected List<String> getExtraCommands() throws MojoFailureException {
+        if(null == extraCommands) parseExtensions();
+        return extraCommands;
+    }
+
     protected InputStream getResourceAsStream(String path) {
         return classloader.getResourceAsStream(path);
     }
 
+
+    protected void parseExtensions() throws MojoFailureException {
+        extraCommands = new LinkedList<String>();
+        Framework framework = Framework.COMPASS;
+
+        extraCommands.add(new StringBuilder("    Compass::Frameworks.register(\"").append(framework.name)
+                .append("\", :path => \"frameworks/compass\")")
+                .toString());
+
+        String[] extensions = getExtensions();
+
+        for(String extension : extensions) {
+            if((framework = Framework.get(extension)).usingArg) {
+                extraCommands.add(new StringBuilder("    Compass::Frameworks.register(\"").append(framework.name)
+                        .append("\", :path => \"frameworks/").append(framework.getDir(getVersions())).append("\")")
+                        .toString());
+            }
+        }
+    }
 
     private ScriptingContainer newScriptingContainer(File currentDirectory) throws MojoFailureException {
         ScriptingContainer container = new ScriptingContainer(LocalContextScope.CONCURRENT);
@@ -117,13 +151,6 @@ public abstract class AbstractCompassMojo extends AbstractMojo {
         container.setLoadPaths(loadPathHelper.getLoadPaths());
         if(getLog().isDebugEnabled()) setRubyDebug(container);
         return container;
-    }
-
-    private void setRubyDebug(ScriptingContainer container) {
-        Ruby runtime = container.getProvider().getRuntime();
-        RubyBoolean rubyTrue = RubyBoolean.newBoolean(runtime, true);
-        runtime.setDebug(rubyTrue);
-        runtime.setVerbose(rubyTrue);
     }
 
     private String[] compileArgs() throws MojoFailureException {
@@ -137,5 +164,12 @@ public abstract class AbstractCompassMojo extends AbstractMojo {
         args.addAll(getArguments());
         if(getLog().isDebugEnabled()) args.add(TRACE_FLAG);
         return args.toArray(new String[args.size()]);
+    }
+
+    private void setRubyDebug(ScriptingContainer container) {
+        Ruby runtime = container.getProvider().getRuntime();
+        RubyBoolean rubyTrue = RubyBoolean.newBoolean(runtime, true);
+        runtime.setDebug(rubyTrue);
+        runtime.setVerbose(rubyTrue);
     }
 }
