@@ -10,6 +10,8 @@ runner = Proc.new do
             Compass::Frameworks.register_directory("frameworks/#{framework}")
         end
     end
+
+# command-injection
     Compass::Exec::SubCommandUI.new(ARGV).run!
 end
 

@@ -25,6 +25,7 @@ import org.jruby.embed.ScriptingContainer;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -77,13 +78,17 @@ public abstract class AbstractCompassMojo extends AbstractMojo {
         if(installDir != null && installDir.exists()) {
             ScriptingContainer container = newScriptingContainer(installDir);
             container.setArgv(compileArgs());
-            container.runScriptlet(classloader.getResourceAsStream(COMPASS_RB_PATH), COMPASS_RB_FILE);
+            container.runScriptlet(new CommandInjectionHelper(this, COMPASS_RB_PATH).getInputStream(), COMPASS_RB_FILE);
         } else throw new MojoFailureException(INVALID_DIRECTORY_ERROR);
     }
 
     protected abstract String getCommand();
 
-    protected List<String> getArguments() {
+    protected List<String> getArguments() throws MojoFailureException {
+        return Collections.emptyList();
+    }
+
+    protected List<String> getExtraCommands() throws MojoFailureException {
         return Collections.emptyList();
     }
 
@@ -94,11 +99,16 @@ public abstract class AbstractCompassMojo extends AbstractMojo {
     protected Properties getVersions() throws MojoFailureException {
         if(versions == null) try {
             versions = new Properties();
-            versions.load(classloader.getResourceAsStream(VERSIONS_PATH));
+            versions.load(getResourceAsStream(VERSIONS_PATH));
         } catch (IOException e) { throw new MojoFailureException(GEM_VERSIONS_ERROR); }
 
         return versions;
     }
+
+    protected InputStream getResourceAsStream(String path) {
+        return classloader.getResourceAsStream(path);
+    }
+
 
     private ScriptingContainer newScriptingContainer(File currentDirectory) throws MojoFailureException {
         ScriptingContainer container = new ScriptingContainer(LocalContextScope.CONCURRENT);
@@ -116,7 +126,7 @@ public abstract class AbstractCompassMojo extends AbstractMojo {
         runtime.setVerbose(rubyTrue);
     }
 
-    private String[] compileArgs() {
+    private String[] compileArgs() throws MojoFailureException {
         List<String> args = new LinkedList<String>();
         args.add(getCommand());
         args.add(CURRENT_DIRECTORY);

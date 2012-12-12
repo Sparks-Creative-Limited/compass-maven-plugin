@@ -102,8 +102,19 @@
     <build>
         <resources>
             <resource><directory>${project.basedir}/src/main/resources</directory></resource>
-            <resource><directory>${jruby.gems.sources}</directory></resource>
+            <resource>
+                <directory>${jruby.gems.sources}</directory>
+                <filtering>false</filtering>
+            </resource>
         </resources>
+
+        <testResources>
+            <testResource><directory>${project.basedir}/src/main/resources</directory></testResource>
+            <testResource>
+                <directory>${jruby.gems.sources}</directory>
+                <filtering>false</filtering>
+            </testResource>
+        </testResources>
 
         <plugins>
             <plugin>
@@ -156,12 +167,39 @@
                                 </configuration>
                             </execution>
                             <execution>
+                                <id>install-960</id>
+                                <goals><goal>exec</goal></goals>
+                                <phase>generate-sources</phase>
+                                <configuration>
+                                    <executable>java</executable>
+                                    <commandlineArgs>${jruby.install.cmd.pre} compass-960-plugin -v ${gem.960.version} ${jruby.install.cmd.post}</commandlineArgs>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>install-yui</id>
+                                <goals><goal>exec</goal></goals>
+                                <phase>generate-sources</phase>
+                                <configuration>
+                                    <executable>java</executable>
+                                    <commandlineArgs>${jruby.install.cmd.pre} yui-compass-plugin -v ${gem.yui.version} ${jruby.install.cmd.post}</commandlineArgs>
+                                </configuration>
+                            </execution>
+                            <execution>
                                 <id>install-zen-grids</id>
                                 <goals><goal>exec</goal></goals>
                                 <phase>generate-sources</phase>
                                 <configuration>
                                     <executable>java</executable>
                                     <commandlineArgs>${jruby.install.cmd.pre} zen-grids -v ${gem.zen-grids.version} ${jruby.install.cmd.post}</commandlineArgs>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>install-zurb-foundation</id>
+                                <goals><goal>exec</goal></goals>
+                                <phase>generate-sources</phase>
+                                <configuration>
+                                    <executable>java</executable>
+                                    <commandlineArgs>${jruby.install.cmd.pre} foundation-sass -v ${gem.zurb-foundation.version} ${jruby.install.cmd.post}</commandlineArgs>
                                 </configuration>
                             </execution>
                         </executions>
