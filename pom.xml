@@ -202,6 +202,24 @@
                                     <commandlineArgs>${jruby.install.cmd.pre} foundation-sass -v ${gem.zurb-foundation.version} ${jruby.install.cmd.post}</commandlineArgs>
                                 </configuration>
                             </execution>
+                            <execution>
+                                <id>install-sassy-buttons</id>
+                                <goals><goal>exec</goal></goals>
+                                <phase>generate-sources</phase>
+                                <configuration>
+                                    <executable>java</executable>
+                                    <commandlineArgs>${jruby.install.cmd.pre} sassy-buttons -v ${gem.sassy-buttons.version} ${jruby.install.cmd.post}</commandlineArgs>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>install-sassy-math</id>
+                                <goals><goal>exec</goal></goals>
+                                <phase>generate-sources</phase>
+                                <configuration>
+                                    <executable>java</executable>
+                                    <commandlineArgs>${jruby.install.cmd.pre} sassy-math -v ${gem.sassy-math.version} ${jruby.install.cmd.post}</commandlineArgs>
+                                </configuration>
+                            </execution>
                         </executions>
                     </plugin>
 
